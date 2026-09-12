@@ -1,16 +1,16 @@
 import streamlit as st
-
+# Inyección directa de manifiesto en HTML estático para PWABuilder
 st.markdown(
     """
-    <script>
-    const link = document.createElement('link');
-    link.rel = 'manifest';
-    link.href = '/app/static/manifest.json';
-    document.head.appendChild(link);
-    </script>
+    <link rel="manifest" href="/app/static/manifest.json">
+    <meta name="theme-color" content="#0284c7">
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
+
+st.title("Control de Clientes - Intmex")
+
+
 from datetime import datetime
 from io import BytesIO
 import folium
