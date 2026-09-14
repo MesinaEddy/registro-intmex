@@ -1,0 +1,9 @@
+streamlit-geolocation
+streamlit
+streamlit-drawable-canvas
+streamlit-folium
+sqlalchemy
+pandas
+folium
+openpyxl
+numpy
