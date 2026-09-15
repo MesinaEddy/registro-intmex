@@ -34,8 +34,11 @@ if "datos_foto_buffer" not in st.session_state:
 if "tipo_evidencia" not in st.session_state:
     st.session_state.tipo_evidencia = "Seleccione"
 
+# Lista completa de rutas solicitadas
+LISTA_RUTAS = ["Seleccione Ruta"] + [f"R{i}" for i in range(1, 17)] + ["C301", "C302"]
+
 defaults = {
-    "num_ruta": "",
+    "num_ruta": "Seleccione Ruta",
     "nombre_asesor": "",
     "nombre_cliente": "",
     "telefono": "",
@@ -47,7 +50,7 @@ defaults = {
     "comprador": "Seleccione",
     "promo_seleccion": "Seleccione",
     "desc_promo": "",
-    "agotados": ""
+    "codigos_sin_impactar": ""
 }
 
 for key, val in defaults.items():
@@ -55,12 +58,12 @@ for key, val in defaults.items():
         st.session_state[key] = val
 
 # ---------------------------------------------------------
-# FUNCIÓN CENTRALIZADA PARA GUARDAR EL REGISTRO
+# FUNCIÓN CENTRALIZADA PARA GUARDAR EL REGISTRO AUTOMÁTICO
 # ---------------------------------------------------------
 def ejecutar_registro_automatico(lat_real, lon_real, desc_evidencia):
     # Validaciones obligatorias antes de guardar
-    if not st.session_state.num_ruta or not st.session_state.nombre_asesor:
-        st.error("⚠️ Complete el Número de Ruta y el Nombre del Asesor.")
+    if st.session_state.num_ruta == "Seleccione Ruta" or not st.session_state.nombre_asesor:
+        st.error("⚠️ Seleccione una Ruta válida y complete el Nombre del Asesor.")
         return False
     if not st.session_state.nombre_cliente or not st.session_state.quien_recibe:
         st.error("⚠️ Complete el Nombre del Cliente y el Nombre de quien recibe.")
@@ -74,8 +77,8 @@ def ejecutar_registro_automatico(lat_real, lon_real, desc_evidencia):
     if st.session_state.promo_seleccion == "✓ (Sí)" and not st.session_state.desc_promo:
         st.error("⚠️ Indique la descripción de la promo impactada.")
         return False
-    if not st.session_state.agotados:
-        st.error("⚠️ El campo de Agotados es obligatorio (indique SKU o escriba 'Ninguno').")
+    if not st.session_state.codigos_sin_impactar:
+        st.error("⚠️ El campo de Códigos sin Impactar es obligatorio (indique SKU o escriba 'Ninguno').")
         return False
     if lat_real == 0.0 or lon_real == 0.0:
         st.error("⚠️ No se ha podido capturar la ubicación GPS. Autorice el acceso a la ubicación en el navegador.")
@@ -96,7 +99,7 @@ def ejecutar_registro_automatico(lat_real, lon_real, desc_evidencia):
         "Accesibilidad": st.session_state.accesibilidad,
         "Comprador": st.session_state.comprador,
         "Promo": texto_promo_final,
-        "Agotados": st.session_state.agotados,
+        "Codigos sin Impactar": st.session_state.codigos_sin_impactar,
         "Evidencia": desc_evidencia,
         "Notas": st.session_state.notas,
         "Latitud": lat_real,
@@ -156,7 +159,6 @@ if st.session_state.modo_firma:
     with col_f1:
         if st.button("✅ Aceptar Firma y Registrar"):
             if canvas_result.image_data is not None:
-                # Al aceptar la firma, guardamos el registro de inmediato de forma automática
                 exito = ejecutar_registro_automatico(lat_real, lon_real, "Firma capturada en lienzo")
                 if exito:
                     st.session_state.modo_firma = False
@@ -181,7 +183,6 @@ elif st.session_state.modo_camara:
     with col_c1:
         if foto_capturada is not None:
             if st.button("✅ Usar esta Foto y Registrar"):
-                # Al aceptar la foto, guardamos el registro de inmediato de forma automática
                 exito = ejecutar_registro_automatico(lat_real, lon_real, "Foto de fachada capturada")
                 if exito:
                     st.session_state.modo_camara = False
@@ -200,7 +201,8 @@ else:
     st.markdown("### 📌 Datos de Ruta y Asesor")
     col_r1, col_r2 = st.columns(2)
     with col_r1:
-        st.session_state.num_ruta = st.text_input("Número de Ruta", value=st.session_state.num_ruta)
+        idx_ruta = LISTA_RUTAS.index(st.session_state.num_ruta) if st.session_state.num_ruta in LISTA_RUTAS else 0
+        st.session_state.num_ruta = st.selectbox("Seleccione Ruta", LISTA_RUTAS, index=idx_ruta)
     with col_r2:
         st.session_state.nombre_asesor = st.text_input("Nombre del Asesor", value=st.session_state.nombre_asesor)
 
@@ -231,7 +233,7 @@ else:
         opts_promo = ["Seleccione", "✓ (Sí)", "X (No)"]
         st.session_state.promo_seleccion = st.selectbox("Promo", opts_promo, index=opts_promo.index(st.session_state.promo_seleccion) if st.session_state.promo_seleccion in opts_promo else 0)
 
-    st.session_state.agotados = st.text_input("Agotados (Indicar SKU o Escribir 'Ninguno')", value=st.session_state.agotados)
+    st.session_state.codigos_sin_impactar = st.text_input("Códigos sin Impactar (Indicar SKU o Escribir 'Ninguno')", value=st.session_state.codigos_sin_impactar)
 
     st.divider()
 
