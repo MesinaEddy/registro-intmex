@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 from streamlit_geolocation import streamlit_geolocation
 from streamlit_drawable_canvas import st_canvas
+import io
 
 # Inyección de manifiesto PWA para PWABuilder
 st.markdown(
@@ -36,7 +37,6 @@ if st.session_state.modo_firma:
     st.markdown("### ✍️ Lienzo de Firma del Cliente")
     st.info("Pida al cliente que firme dentro del recuadro utilizando su dedo o un lápiz táctil.")
     
-    # Lienzo interactivo de dibujo
     canvas_result = st_canvas(
         fill_color="rgba(255, 165, 0, 0.3)",
         stroke_width=3,
@@ -116,7 +116,6 @@ else:
             ["Seleccione", "Firma del Cliente", "Foto de la Fachada (Cámara trasera)"]
         )
         
-        # Manejo de la evidencia visual en el formulario
         foto_fachada = None
         if tipo_evidencia == "Foto de la Fachada (Cámara trasera)":
             st.info("📷 Capture la foto de la fachada utilizando la cámara trasera.")
@@ -126,7 +125,6 @@ else:
         
         submitted = st.form_submit_button("Registrar Cliente")
 
-    # Botones fuera del form para activar el lienzo de firma si eligieron esa opción
     if tipo_evidencia == "Firma del Cliente":
         if not st.session_state.firma_guardada:
             if st.button("✍️ Abrir Lienzo para Firmar"):
@@ -140,7 +138,6 @@ else:
                 st.rerun()
 
     if submitted:
-        # Validaciones
         evidencia_valida = False
         desc_evidencia = "Sin evidencia"
 
@@ -190,8 +187,6 @@ else:
                 st.session_state.datos = []
             
             st.session_state.datos.append(nuevo_registro)
-            
-            # Resetear estado de firma para el siguiente cliente
             st.session_state.firma_guardada = False
             
             st.success("✅ ¡Cliente registrado con éxito y tabulador completado!")
@@ -210,16 +205,37 @@ if ACCESS_GRANTED:
         df_display = df.drop(columns=["LinkMaps"], errors="ignore")
         st.dataframe(df_display)
 
-        csv_masivo = df.to_csv(index=False).encode('utf-8')
+        st.markdown("### 📥 Opciones de Exportación")
         
-        st.download_button(
-            label="🗺️ Descargar CSV Masivo para Google My Maps",
-            data=csv_masivo,
-            file_name="pines_masivos_intmex.csv",
-            mime="text/csv",
-            help="Sube este archivo en mymaps.google.com con la cuenta de la empresa."
-        )
+        col_exp1, col_exp2 = st.columns(2)
         
+        with col_exp1:
+            # Botón 1: CSV Masivo para Google My Maps
+            csv_masivo = df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="🗺️ Descargar CSV para My Maps",
+                data=csv_masivo,
+                file_name="pines_masivos_intmex.csv",
+                mime="text/csv",
+                help="Sube este archivo en mymaps.google.com con la cuenta de la empresa."
+            )
+            
+        with col_exp2:
+            # Botón 2: Reporte Ejecutivo Profesional en Excel (.xlsx)
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df.to_excel(writer, index=False, sheet_name='Reporte_Operativo')
+            excel_data = output.getvalue()
+            
+            st.download_button(
+                label="📊 Descargar Reporte en Excel",
+                data=excel_data,
+                file_name=f"reporte_ejecutivo_intmex_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                help="Descarga un reporte ordenado con todos los detalles del tabulador y operaciones."
+            )
+        
+        st.markdown("---")
         if st.button("🗑️ Limpiar Base de Datos de Registros"):
             st.session_state.datos = []
             st.rerun()
