@@ -4,7 +4,41 @@ from datetime import datetime
 from streamlit_geolocation import streamlit_geolocation
 from streamlit_drawable_canvas import st_canvas
 import io
+import base64
 
+# Función para convertir la imagen local a Base64
+def get_base64_of_image(image_path):
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode()
+
+# Cargar la imagen en base64 (asegúrate de que se llame "logo3.png")
+try:
+    img_base64 = get_base64_of_image("logo3.png")
+    background_css = f"""
+    <style>
+    /* Fondo para toda la aplicación principal */
+    .stApp {{
+        background-image: linear-gradient(rgba(13, 17, 23, 0.88), rgba(13, 17, 23, 0.88)), url("data:image/png;base64,{img_base64}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }}
+
+    /* Fondo para la barra lateral (Sidebar) */
+    [data-testid="stSidebar"] {{
+        background-image: linear-gradient(rgba(13, 17, 23, 0.92), rgba(13, 17, 23, 0.92)), url("data:image/png;base64,{img_base64}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }}
+    </style>
+    """
+    st.markdown(background_css, unsafe_allow_html=True)
+except Exception as e:
+    st.warning(f"No se pudo cargar la imagen de fondo: {e}")
+    
 # 1. Configuración de la página (Única vez y al inicio de las funciones de Streamlit)
 st.set_page_config(
     page_title="Control de Clientes - Intmex",
