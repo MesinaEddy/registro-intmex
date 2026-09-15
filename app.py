@@ -24,7 +24,7 @@ with st.sidebar:
     admin_pass = st.text_input("Contraseña de Admin", type="password")
     ACCESS_GRANTED = (admin_pass == "AdminIntmex2026*") 
 
-# Inicializar estados de sesión para flujos de firma, cámara y promo
+# Inicializar todos los estados de sesión necesarios para evitar que se borren los datos
 if "modo_firma" not in st.session_state:
     st.session_state.modo_firma = False
 if "firma_guardada" not in st.session_state:
@@ -40,8 +40,26 @@ if "datos_foto_buffer" not in st.session_state:
 if "tipo_evidencia" not in st.session_state:
     st.session_state.tipo_evidencia = "Seleccione"
 
-if "promo_seleccionada" not in st.session_state:
-    st.session_state.promo_seleccionada = "Seleccione"
+# Inicializar valores del formulario en session_state
+defaults = {
+    "num_ruta": "",
+    "nombre_asesor": "",
+    "nombre_cliente": "",
+    "telefono": "",
+    "quien_recibe": "",
+    "notas": "",
+    "tipo_cte": "Seleccione",
+    "visibilidad": "Seleccione",
+    "accesibilidad": "Seleccione",
+    "comprador": "Seleccione",
+    "promo_seleccion": "Seleccione",
+    "desc_promo": "",
+    "agotados": ""
+}
+
+for key, val in defaults.items():
+    if key not in st.session_state:
+        st.session_state[key] = val
 
 # ---------------------------------------------------------
 # 2. PANTALLA EXCLUSIVA DE LIENZO PARA LA FIRMA
@@ -120,7 +138,7 @@ else:
         st.warning("⚠️ Esperando permisos de ubicación o clic en el botón de geolocalización...")
 
     # ---------------------------------------------------------
-    # 5. FORMULARIO DE REGISTRO
+    # 5. FORMULARIO DE REGISTRO CON RETENCIÓN DE DATOS
     # ---------------------------------------------------------
     st.subheader("📝 Registro de Nuevo Cliente y Tabulador")
 
@@ -128,53 +146,69 @@ else:
         st.markdown("### 📌 Datos de Ruta y Asesor")
         col_r1, col_r2 = st.columns(2)
         with col_r1:
-            num_ruta = st.text_input("Número de Ruta")
+            num_ruta = st.text_input("Número de Ruta", value=st.session_state.num_ruta)
         with col_r2:
-            nombre_asesor = st.text_input("Nombre del Asesor")
+            nombre_asesor = st.text_input("Nombre del Asesor", value=st.session_state.nombre_asesor)
 
         st.markdown("### 📌 Datos Generales del Cliente")
-        nombre_cliente = st.text_input("Nombre del Cliente")
-        telefono = st.text_input("Teléfono")
-        quien_recibe = st.text_input("Nombre de quien recibe")
-        notas = st.text_area("Notas o servicio realizado")
+        nombre_cliente = st.text_input("Nombre del Cliente", value=st.session_state.nombre_cliente)
+        telefono = st.text_input("Teléfono", value=st.session_state.telefono)
+        quien_recibe = st.text_input("Nombre de quien recibe", value=st.session_state.quien_recibe)
+        notas = st.text_area("Notas o servicio realizado", value=st.session_state.notas)
         
         st.divider()
         st.markdown("### 📊 Tabulador de Supervisión (Obligatorio)")
         
         col1, col2 = st.columns(2)
         with col1:
-            tipo_cte = st.selectbox("Tipo Cte", ["Seleccione", "A", "B", "C"])
-            visibilidad = st.selectbox("Visibilidad", ["Seleccione", "✓ (Sí)", "X (No)"])
-            accesibilidad = st.selectbox("Accesibilidad", ["Seleccione", "✓ (Sí)", "X (No)"])
+            opts_tipo = ["Seleccione", "A", "B", "C"]
+            idx_tipo = opts_tipo.index(st.session_state.tipo_cte) if st.session_state.tipo_cte in opts_tipo else 0
+            tipo_cte = st.selectbox("Tipo Cte", opts_tipo, index=idx_tipo)
+
+            opts_visi = ["Seleccione", "✓ (Sí)", "X (No)"]
+            idx_visi = opts_visi.index(st.session_state.visibilidad) if st.session_state.visibilidad in opts_visi else 0
+            visibilidad = st.selectbox("Visibilidad", opts_visi, index=idx_visi)
+
+            opts_acce = ["Seleccione", "✓ (Sí)", "X (No)"]
+            idx_acce = opts_acce.index(st.session_state.accesibilidad) if st.session_state.accesibilidad in opts_acce else 0
+            accesibilidad = st.selectbox("Accesibilidad", opts_acce, index=idx_acce)
         
         with col2:
-            comprador = st.selectbox("Comprador", ["Seleccione", "✓ (Sí)", "X (No)"])
-            # Dejamos un campo fijo dentro del form para que no se pierda al enviar
-            promo_form = st.selectbox("Promo", ["Seleccione", "✓ (Sí)", "X (No)"], key="promo_form_key")
+            opts_comp = ["Seleccione", "✓ (Sí)", "X (No)"]
+            idx_comp = opts_comp.index(st.session_state.comprador) if st.session_state.comprador in opts_comp else 0
+            comprador = st.selectbox("Comprador", opts_comp, index=idx_comp)
 
-        agotados = st.text_input("Agotados (Indicar SKU o Escribir 'Ninguno')")
+            opts_promo = ["Seleccione", "✓ (Sí)", "X (No)"]
+            idx_promo = opts_promo.index(st.session_state.promo_seleccion) if st.session_state.promo_seleccion in opts_promo else 0
+            promo_seleccion = st.selectbox("Promo", opts_promo, index=idx_promo)
+
+        agotados = st.text_input("Agotados (Indicar SKU o Escribir 'Ninguno')", value=st.session_state.agotados)
 
         submitted = st.form_submit_button("Registrar Cliente")
 
     st.divider()
 
     # ---------------------------------------------------------
-    # 6. CAMPO DINÁMICO DE PROMO FUERA DEL FORMULARIO (APARECE AL INSTANTE)
+    # 6. CAMPO DINÁMICO DE PROMO FUERA DEL FORMULARIO
     # ---------------------------------------------------------
     st.markdown("### 🎯 Detalle de Promoción")
     opciones_promo = ["Seleccione", "✓ (Sí)", "X (No)"]
     
-    # Sincronizamos con el selectbox del formulario mediante session_state si se desea, 
-    # o manejamos la selección interactiva fluida aquí:
-    promo_seleccion = st.selectbox(
+    # Sincronizamos el selector dinámico con el state global
+    idx_sel_dinamico = opciones_promo.index(st.session_state.promo_seleccion) if st.session_state.promo_seleccion in opciones_promo else 0
+    promo_seleccion_dinamica = st.selectbox(
         "¿Se aplicó o impactó alguna Promo?",
         opciones_promo,
+        index=idx_sel_dinamico,
         key="selector_promo_dinamico"
     )
+    # Actualizamos el estado general de la promo
+    st.session_state.promo_seleccion = promo_seleccion_dinamica
 
     desc_promo = ""
-    if promo_seleccion == "✓ (Sí)":
-        desc_promo = st.text_area("📝 Escriba la descripción de la promo impactada (Obligatorio)")
+    if st.session_state.promo_seleccion == "✓ (Sí)":
+        desc_promo = st.text_area("📝 Escriba la descripción de la promo impactada (Obligatorio)", value=st.session_state.desc_promo)
+        st.session_state.desc_promo = desc_promo
 
     st.divider()
     
@@ -198,6 +232,19 @@ else:
         st.markdown("---")
         if not st.session_state.firma_guardada:
             if st.button("✍️ Abrir Lienzo para Firmar"):
+                # Capturamos todos los textos actuales en session_state antes de salir al lienzo
+                st.session_state.num_ruta = num_ruta
+                st.session_state.nombre_asesor = nombre_asesor
+                st.session_state.nombre_cliente = nombre_cliente
+                st.session_state.telefono = telefono
+                st.session_state.quien_recibe = quien_recibe
+                st.session_state.notas = notas
+                st.session_state.tipo_cte = tipo_cte
+                st.session_state.visibilidad = visibilidad
+                st.session_state.accesibilidad = accesibilidad
+                st.session_state.comprador = comprador
+                st.session_state.agotados = agotados
+                
                 st.session_state.modo_firma = True
                 st.rerun()
         else:
@@ -211,6 +258,19 @@ else:
         st.markdown("---")
         if not st.session_state.foto_guardada:
             if st.button("📷 Abrir Cámara para Fachada"):
+                # Capturamos todos los textos actuales en session_state antes de salir a la cámara
+                st.session_state.num_ruta = num_ruta
+                st.session_state.nombre_asesor = nombre_asesor
+                st.session_state.nombre_cliente = nombre_cliente
+                st.session_state.telefono = telefono
+                st.session_state.quien_recibe = quien_recibe
+                st.session_state.notas = notas
+                st.session_state.tipo_cte = tipo_cte
+                st.session_state.visibilidad = visibilidad
+                st.session_state.accesibilidad = accesibilidad
+                st.session_state.comprador = comprador
+                st.session_state.agotados = agotados
+
                 st.session_state.modo_camara = True
                 st.rerun()
         else:
@@ -246,9 +306,9 @@ else:
             st.error("⚠️ Complete el Nombre del Cliente y el Nombre de quien recibe.")
         elif tipo_cte == "Seleccione" or visibilidad == "Seleccione" or accesibilidad == "Seleccione" or comprador == "Seleccione":
             st.error("⚠️ Debe completar los campos del Tabulador de Supervisión.")
-        elif promo_seleccion == "Seleccione":
+        elif st.session_state.promo_seleccion == "Seleccione":
             st.error("⚠️ Indique si hubo Promo o no en la sección de Detalle de Promoción.")
-        elif promo_seleccion == "✓ (Sí)" and not desc_promo:
+        elif st.session_state.promo_seleccion == "✓ (Sí)" and not desc_promo:
             st.error("⚠️ Indique la descripción de la promo impactada.")
         elif not agotados:
             st.error("⚠️ El campo de Agotados es obligatorio (indique SKU o escriba 'Ninguno').")
@@ -258,7 +318,7 @@ else:
             link_maps = f"https://www.google.com/maps/search/?api=1&query={lat_real},{lon_real}"
             
             # Texto formal para el reporte
-            texto_promo_final = f"Sí - {desc_promo}" if promo_seleccion == "✓ (Sí)" else "No"
+            texto_promo_final = f"Sí - {desc_promo}" if st.session_state.promo_seleccion == "✓ (Sí)" else "No"
 
             nuevo_registro = {
                 "Fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -285,11 +345,13 @@ else:
             
             st.session_state.datos.append(nuevo_registro)
             
-            # Limpiar estados para el siguiente registro
+            # Limpiar estados generales y del formulario tras el éxito
             st.session_state.firma_guardada = False
             st.session_state.foto_guardada = False
             st.session_state.datos_foto_buffer = None
             st.session_state.tipo_evidencia = "Seleccione"
+            for k in defaults:
+                st.session_state[k] = defaults[k]
             
             st.success("✅ ¡Cliente registrado con éxito y tabulador completado!")
             st.rerun()
