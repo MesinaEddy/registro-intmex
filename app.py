@@ -5,6 +5,22 @@ from streamlit_geolocation import streamlit_geolocation
 from streamlit_drawable_canvas import st_canvas
 import io
 import base64
+   
+# 1. Configuración de la página (Única vez y al inicio de las funciones de Streamlit)
+st.set_page_config(
+    page_title="Control de Clientes - Intmex",
+    page_icon="📍",
+    layout="wide"
+)
+
+# 2. Inyección de manifiesto PWA para PWABuilder
+st.markdown(
+    """
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    """,
+    unsafe_allow_html=True
+)
 
 # Función para convertir la imagen local a Base64
 def get_base64_of_image(image_path):
@@ -38,50 +54,6 @@ try:
     st.markdown(background_css, unsafe_allow_html=True)
 except Exception as e:
     st.warning(f"No se pudo cargar la imagen de fondo: {e}")
-    
-# 1. Configuración de la página (Única vez y al inicio de las funciones de Streamlit)
-st.set_page_config(
-    page_title="Control de Clientes - Intmex",
-    page_icon="📍",
-    layout="wide"
-)
-
-# 2. Inyección de manifiesto PWA para PWABuilder
-st.markdown(
-    """
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    """,
-    unsafe_allow_html=True
-)
-
-# 3. Bloque de CSS para el fondo estático y difuminado en toda la app
-st.markdown(
-    """
-    <style>
-    /* Fondo para toda la aplicación principal */
-    .stApp {
-        background-image: linear-gradient(rgba(13, 17, 23, 0.88), rgba(13, 17, 23, 0.88)), url("logo3.png");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }
-
-    /* Fondo para la barra lateral (Sidebar) */
-    [data-testid="stSidebar"] {
-        background-image: linear-gradient(rgba(13, 17, 23, 0.92), rgba(13, 17, 23, 0.92)), url("logo3.png");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# --- AQUÍ CONTINÚA EL RESTO DE TU CÓDIGO ORIGINAL ---
 # ---------------------------------------------------------
 # 1. CONTROL DE ACCESO AL DASHBOARD (Solo Administrador)
 # ---------------------------------------------------------
