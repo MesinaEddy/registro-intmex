@@ -17,13 +17,15 @@ st.markdown(
 # ---------------------------------------------------------
 # LOGOTIPO Y TÍTULO DE LA EMPRESA
 # ---------------------------------------------------------
-# Opción 1: Si tienes el archivo localmente en tu repositorio (ej. "logo.png")
-# st.image("logo.png", width=200)
 
-# Opción 2: Si prefieres usar una URL directa de imagen alojada en la web
-# st.image("https://tu-sitio-web.com/logo_intmex.png", width=200)
+# 1. Muestra el logo en la barra lateral
+st.sidebar.image("logo3.png", width=150)
+
+# 2. Muestra el logo arriba del título en la página principal
+st.image("logo3.png", width=200)
 
 st.title("Control de Clientes - Intmex")
+
 
 # ---------------------------------------------------------
 # 1. CONTROL DE ACCESO AL DASHBOARD (Solo Administrador)
