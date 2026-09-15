@@ -24,11 +24,18 @@ with st.sidebar:
     admin_pass = st.text_input("Contraseña de Admin", type="password")
     ACCESS_GRANTED = (admin_pass == "AdminIntmex2026*") 
 
-# Inicializar estados de sesión para el flujo de la firma
+# Inicializar estados de sesión para flujos de firma y cámara
 if "modo_firma" not in st.session_state:
     st.session_state.modo_firma = False
 if "firma_guardada" not in st.session_state:
     st.session_state.firma_guardada = False
+
+if "modo_camara" not in st.session_state:
+    st.session_state.modo_camara = False
+if "foto_guardada" not in st.session_state:
+    st.session_state.foto_guardada = False
+if "datos_foto_buffer" not in st.session_state:
+    st.session_state.datos_foto_buffer = None
 
 # ---------------------------------------------------------
 # 2. PANTALLA EXCLUSIVA DE LIENZO PARA LA FIRMA
@@ -45,6 +52,7 @@ if st.session_state.modo_firma:
         height=350,
         width=400,
         drawing_mode="freedraw",
+        return_image_data=True,
         key="canvas_firma",
     )
     
@@ -59,13 +67,36 @@ if st.session_state.modo_firma:
             else:
                 st.warning("Por favor, realice una firma antes de aceptar.")
     with col_f2:
-        if st.button("❌ Cancelar"):
+        if st.button("❌ Cancelar Firma"):
             st.session_state.modo_firma = False
+            st.rerun()
+
+# ---------------------------------------------------------
+# 3. PANTALLA EXCLUSIVA DE CÁMARA PARA LA FACHADA
+# ---------------------------------------------------------
+elif st.session_state.modo_camara:
+    st.markdown("### 📷 Capturar Foto de la Fachada")
+    st.info("Apunte con la cámara trasera hacia la fachada del establecimiento y tome la foto.")
+    
+    foto_capturada = st.camera_input("Tomar foto")
+    
+    col_c1, col_c2 = st.columns(2)
+    with col_c1:
+        if foto_capturada is not None:
+            if st.button("✅ Usar esta Foto"):
+                st.session_state.datos_foto_buffer = foto_capturada
+                st.session_state.foto_guardada = True
+                st.session_state.modo_camara = False
+                st.success("¡Foto de fachada guardada correctamente!")
+                st.rerun()
+    with col_c2:
+        if st.button("❌ Cancelar Cámara"):
+            st.session_state.modo_camara = False
             st.rerun()
 
 else:
     # ---------------------------------------------------------
-    # 3. CAPTURA DE UBICACIÓN GPS REAL
+    # 4. CAPTURA DE UBICACIÓN GPS REAL
     # ---------------------------------------------------------
     st.subheader("📍 Geolocalización del Dispositivo")
     st.info("Haz clic en el botón de abajo para permitir y obtener la ubicación GPS actual.")
@@ -83,7 +114,7 @@ else:
         st.warning("⚠️ Esperando permisos de ubicación o clic en el botón de geolocalización...")
 
     # ---------------------------------------------------------
-    # 4. FORMULARIO DE REGISTRO
+    # 5. FORMULARIO DE REGISTRO
     # ---------------------------------------------------------
     st.subheader("📝 Registro de Nuevo Cliente y Tabulador")
 
@@ -115,17 +146,14 @@ else:
             "Seleccione el tipo de evidencia obligatoria:",
             ["Seleccione", "Firma del Cliente", "Foto de la Fachada (Cámara trasera)"]
         )
-        
-        foto_fachada = None
-        if tipo_evidencia == "Foto de la Fachada (Cámara trasera)":
-            st.info("📷 Capture la foto de la fachada utilizando la cámara trasera.")
-            foto_fachada = st.camera_input("Tomar foto de la fachada")
 
         st.write("📍 **Ubicación GPS:** Se validará automáticamente.")
         
         submitted = st.form_submit_button("Registrar Cliente")
 
+    # Botones dinámicos según el tipo de evidencia seleccionado
     if tipo_evidencia == "Firma del Cliente":
+        st.markdown("---")
         if not st.session_state.firma_guardada:
             if st.button("✍️ Abrir Lienzo para Firmar"):
                 st.session_state.modo_firma = True
@@ -137,6 +165,19 @@ else:
                 st.session_state.modo_firma = True
                 st.rerun()
 
+    elif tipo_evidencia == "Foto de la Fachada (Cámara trasera)":
+        st.markdown("---")
+        if not st.session_state.foto_guardada:
+            if st.button("📷 Abrir Cámara para Fachada"):
+                st.session_state.modo_camara = True
+                st.rerun()
+        else:
+            st.success("✅ Foto de fachada capturada y lista.")
+            if st.button("🔄 Tomar otra foto"):
+                st.session_state.foto_guardada = False
+                st.session_state.modo_camara = True
+                st.rerun()
+
     if submitted:
         evidencia_valida = False
         desc_evidencia = "Sin evidencia"
@@ -145,7 +186,7 @@ else:
             st.error("⚠️ Debe seleccionar un tipo de evidencia obligatoria (Firma o Foto).")
         elif tipo_evidencia == "Firma del Cliente" and not st.session_state.firma_guardada:
             st.error("⚠️ Debe capturar la firma del cliente usando el botón de lienzo.")
-        elif tipo_evidencia == "Foto de la Fachada (Cámara trasera)" and foto_fachada is None:
+        elif tipo_evidencia == "Foto de la Fachada (Cámara trasera)" and not st.session_state.foto_guardada:
             st.error("⚠️ Debe tomar la foto de la fachada para completar el registro.")
         else:
             evidencia_valida = True
@@ -187,12 +228,16 @@ else:
                 st.session_state.datos = []
             
             st.session_state.datos.append(nuevo_registro)
+            
+            # Limpiar estados de evidencias para el siguiente registro
             st.session_state.firma_guardada = False
+            st.session_state.foto_guardada = False
+            st.session_state.datos_foto_buffer = None
             
             st.success("✅ ¡Cliente registrado con éxito y tabulador completado!")
 
 # ---------------------------------------------------------
-# 5. DASHBOARD EXCLUSIVO PARA ADMINISTRADORES
+# 6. DASHBOARD EXCLUSIVO PARA ADMINISTRADORES
 # ---------------------------------------------------------
 if ACCESS_GRANTED:
     st.divider()
@@ -210,7 +255,6 @@ if ACCESS_GRANTED:
         col_exp1, col_exp2 = st.columns(2)
         
         with col_exp1:
-            # Botón 1: CSV Masivo para Google My Maps
             csv_masivo = df.to_csv(index=False).encode('utf-8')
             st.download_button(
                 label="🗺️ Descargar CSV para My Maps",
@@ -221,7 +265,6 @@ if ACCESS_GRANTED:
             )
             
         with col_exp2:
-            # Botón 2: Reporte Ejecutivo Profesional en Excel (.xlsx)
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
                 df.to_excel(writer, index=False, sheet_name='Reporte_Operativo')
