@@ -37,6 +37,10 @@ if "foto_guardada" not in st.session_state:
 if "datos_foto_buffer" not in st.session_state:
     st.session_state.datos_foto_buffer = None
 
+# Guardar temporalmente el tipo de evidencia seleccionado
+if "tipo_evidencia" not in st.session_state:
+    st.session_state.tipo_evidencia = "Seleccione"
+
 # ---------------------------------------------------------
 # 2. PANTALLA EXCLUSIVA DE LIENZO PARA LA FIRMA
 # ---------------------------------------------------------
@@ -76,7 +80,7 @@ if st.session_state.modo_firma:
 # ---------------------------------------------------------
 elif st.session_state.modo_camara:
     st.markdown("### 📷 Capturar Foto de la Fachada")
-    st.info("Apunte con la cámara trasera hacia la fachada del establecimiento y tome la foto.")
+    st.info("Apunte con la cámara hacia la fachada del establecimiento y tome la foto.")
     
     foto_capturada = st.camera_input("Tomar foto")
     
@@ -114,7 +118,7 @@ else:
         st.warning("⚠️ Esperando permisos de ubicación o clic en el botón de geolocalización...")
 
     # ---------------------------------------------------------
-    # 5. FORMULARIO DE REGISTRO
+    # 5. FORMULARIO DE REGISTRO (CAMPOS GENERALES Y TABULADOR)
     # ---------------------------------------------------------
     st.subheader("📝 Registro de Nuevo Cliente y Tabulador")
 
@@ -140,19 +144,28 @@ else:
         
         agotados = st.text_input("Agotados (Indicar SKU o Escribir 'Ninguno')")
 
-        st.divider()
-        st.markdown("### 📸 Evidencia Obligatoria")
-        tipo_evidencia = st.radio(
-            "Seleccione el tipo de evidencia obligatoria:",
-            ["Seleccione", "Firma del Cliente", "Foto de la Fachada (Cámara trasera)"]
-        )
-
-        st.write("📍 **Ubicación GPS:** Se validará automáticamente.")
-        
         submitted = st.form_submit_button("Registrar Cliente")
 
-    # Botones dinámicos según el tipo de evidencia seleccionado
-    if tipo_evidencia == "Firma del Cliente":
+    st.divider()
+    
+    # ---------------------------------------------------------
+    # 6. SELECCIÓN DE EVIDENCIA FUERA DEL FORMULARIO (RESPUESTA INMEDIATA)
+    # ---------------------------------------------------------
+    st.markdown("### 📸 Evidencia Obligatoria")
+    
+    opciones_evidencia = ["Seleccione", "Firma del Cliente", "Foto de la Fachada (Cámara trasera)"]
+    indice_actual = opciones_evidencia.index(st.session_state.tipo_evidencia) if st.session_state.tipo_evidencia in opciones_evidencia else 0
+
+    tipo_evidencia = st.radio(
+        "Seleccione el tipo de evidencia obligatoria:",
+        opciones_evidencia,
+        index=indice_actual,
+        key="radio_evidencia_cambio",
+        on_change=lambda: setattr(st.session_state, 'tipo_evidencia', st.session_state.radio_evidencia_cambio)
+    )
+
+    # Botones dinámicos que aparecen al instante según la opción elegida
+    if st.session_state.tipo_evidencia == "Firma del Cliente":
         st.markdown("---")
         if not st.session_state.firma_guardada:
             if st.button("✍️ Abrir Lienzo para Firmar"):
@@ -165,7 +178,7 @@ else:
                 st.session_state.modo_firma = True
                 st.rerun()
 
-    elif tipo_evidencia == "Foto de la Fachada (Cámara trasera)":
+    elif st.session_state.tipo_evidencia == "Foto de la Fachada (Cámara trasera)":
         st.markdown("---")
         if not st.session_state.foto_guardada:
             if st.button("📷 Abrir Cámara para Fachada"):
@@ -178,19 +191,22 @@ else:
                 st.session_state.modo_camara = True
                 st.rerun()
 
+    # ---------------------------------------------------------
+    # 7. PROCESO DE VALIDACIÓN AL ENVIAR EL FORMULARIO
+    # ---------------------------------------------------------
     if submitted:
         evidencia_valida = False
         desc_evidencia = "Sin evidencia"
 
-        if tipo_evidencia == "Seleccione":
+        if st.session_state.tipo_evidencia == "Seleccione":
             st.error("⚠️ Debe seleccionar un tipo de evidencia obligatoria (Firma o Foto).")
-        elif tipo_evidencia == "Firma del Cliente" and not st.session_state.firma_guardada:
+        elif st.session_state.tipo_evidencia == "Firma del Cliente" and not st.session_state.firma_guardada:
             st.error("⚠️ Debe capturar la firma del cliente usando el botón de lienzo.")
-        elif tipo_evidencia == "Foto de la Fachada (Cámara trasera)" and not st.session_state.foto_guardada:
+        elif st.session_state.tipo_evidencia == "Foto de la Fachada (Cámara trasera)" and not st.session_state.foto_guardada:
             st.error("⚠️ Debe tomar la foto de la fachada para completar el registro.")
         else:
             evidencia_valida = True
-            if tipo_evidencia == "Firma del Cliente":
+            if st.session_state.tipo_evidencia == "Firma del Cliente":
                 desc_evidencia = "Firma capturada en lienzo"
             else:
                 desc_evidencia = "Foto de fachada capturada"
@@ -233,11 +249,13 @@ else:
             st.session_state.firma_guardada = False
             st.session_state.foto_guardada = False
             st.session_state.datos_foto_buffer = None
+            st.session_state.tipo_evidencia = "Seleccione"
             
             st.success("✅ ¡Cliente registrado con éxito y tabulador completado!")
+            st.rerun()
 
 # ---------------------------------------------------------
-# 6. DASHBOARD EXCLUSIVO PARA ADMINISTRADORES
+# 8. DASHBOARD EXCLUSIVO PARA ADMINISTRADORES
 # ---------------------------------------------------------
 if ACCESS_GRANTED:
     st.divider()
