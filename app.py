@@ -37,7 +37,6 @@ if "foto_guardada" not in st.session_state:
 if "datos_foto_buffer" not in st.session_state:
     st.session_state.datos_foto_buffer = None
 
-# Guardar temporalmente el tipo de evidencia seleccionado
 if "tipo_evidencia" not in st.session_state:
     st.session_state.tipo_evidencia = "Seleccione"
 
@@ -123,7 +122,14 @@ else:
     st.subheader("📝 Registro de Nuevo Cliente y Tabulador")
 
     with st.form("form_registro_cliente"):
-        st.markdown("### 📌 Datos Generales")
+        st.markdown("### 📌 Datos de Ruta y Asesor")
+        col_r1, col_r2 = st.columns(2)
+        with col_r1:
+            num_ruta = st.text_input("Número de Ruta")
+        with col_r2:
+            nombre_asesor = st.text_input("Nombre del Asesor")
+
+        st.markdown("### 📌 Datos Generales del Cliente")
         nombre_cliente = st.text_input("Nombre del Cliente")
         telefono = st.text_input("Teléfono")
         quien_recibe = st.text_input("Nombre de quien recibe")
@@ -142,6 +148,11 @@ else:
             comprador = st.selectbox("Comprador", ["Seleccione", "✓ (Sí)", "X (No)"])
             promo = st.selectbox("Promo", ["Seleccione", "✓ (Sí)", "X (No)"])
         
+        # Campo dinámico de descripción de promo dentro del form según selección
+        desc_promo = "N/A"
+        if promo == "✓ (Sí)":
+            desc_promo = st.text_input("📝 Descripción de la Promo Impactada (Obligatorio)")
+
         agotados = st.text_input("Agotados (Indicar SKU o Escribir 'Ninguno')")
 
         submitted = st.form_submit_button("Registrar Cliente")
@@ -149,7 +160,7 @@ else:
     st.divider()
     
     # ---------------------------------------------------------
-    # 6. SELECCIÓN DE EVIDENCIA FUERA DEL FORMULARIO (RESPUESTA INMEDIATA)
+    # 6. SELECCIÓN DE EVIDENCIA FUERA DEL FORMULARIO
     # ---------------------------------------------------------
     st.markdown("### 📸 Evidencia Obligatoria")
     
@@ -164,7 +175,6 @@ else:
         on_change=lambda: setattr(st.session_state, 'tipo_evidencia', st.session_state.radio_evidencia_cambio)
     )
 
-    # Botones dinámicos que aparecen al instante según la opción elegida
     if st.session_state.tipo_evidencia == "Firma del Cliente":
         st.markdown("---")
         if not st.session_state.firma_guardada:
@@ -211,10 +221,14 @@ else:
             else:
                 desc_evidencia = "Foto de fachada capturada"
 
-        if not nombre_cliente or not quien_recibe:
+        if not num_ruta or not nombre_asesor:
+            st.error("⚠️ Complete el Número de Ruta y el Nombre del Asesor.")
+        elif not nombre_cliente or not quien_recibe:
             st.error("⚠️ Complete el Nombre del Cliente y el Nombre de quien recibe.")
         elif tipo_cte == "Seleccione" or visibilidad == "Seleccione" or accesibilidad == "Seleccione" or comprador == "Seleccione" or promo == "Seleccione":
             st.error("⚠️ Debe completar todos los campos del Tabulador de Supervisión.")
+        elif promo == "✓ (Sí)" and not desc_promo:
+            st.error("⚠️ Indique la descripción de la promo impactada.")
         elif not agotados:
             st.error("⚠️ El campo de Agotados es obligatorio (indique SKU o escriba 'Ninguno').")
         elif lat_real == 0.0 or lon_real == 0.0:
@@ -222,8 +236,13 @@ else:
         elif evidencia_valida:
             link_maps = f"https://www.google.com/maps/search/?api=1&query={lat_real},{lon_real}"
             
+            # Texto formal para el registro de promo combinado en el reporte
+            texto_promo_final = f"Sí - {desc_promo}" if promo == "✓ (Sí)" else "No"
+
             nuevo_registro = {
                 "Fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Ruta": num_ruta,
+                "Asesor": nombre_asesor,
                 "Cliente": nombre_cliente,
                 "Teléfono": telefono,
                 "Quien Recibe": quien_recibe,
@@ -231,7 +250,7 @@ else:
                 "Visibilidad": visibilidad,
                 "Accesibilidad": accesibilidad,
                 "Comprador": comprador,
-                "Promo": promo,
+                "Promo": texto_promo_final,
                 "Agotados": agotados,
                 "Evidencia": desc_evidencia,
                 "Notas": notas,
