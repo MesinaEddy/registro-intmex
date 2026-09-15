@@ -24,7 +24,7 @@ with st.sidebar:
     admin_pass = st.text_input("Contraseña de Admin", type="password")
     ACCESS_GRANTED = (admin_pass == "AdminIntmex2026*") 
 
-# Inicializar estados de sesión para flujos de firma y cámara
+# Inicializar estados de sesión para flujos de firma, cámara y promo
 if "modo_firma" not in st.session_state:
     st.session_state.modo_firma = False
 if "firma_guardada" not in st.session_state:
@@ -39,6 +39,9 @@ if "datos_foto_buffer" not in st.session_state:
 
 if "tipo_evidencia" not in st.session_state:
     st.session_state.tipo_evidencia = "Seleccione"
+
+if "promo_seleccionada" not in st.session_state:
+    st.session_state.promo_seleccionada = "Seleccione"
 
 # ---------------------------------------------------------
 # 2. PANTALLA EXCLUSIVA DE LIENZO PARA LA FIRMA
@@ -117,7 +120,7 @@ else:
         st.warning("⚠️ Esperando permisos de ubicación o clic en el botón de geolocalización...")
 
     # ---------------------------------------------------------
-    # 5. FORMULARIO DE REGISTRO (CAMPOS GENERALES Y TABULADOR)
+    # 5. FORMULARIO DE REGISTRO
     # ---------------------------------------------------------
     st.subheader("📝 Registro de Nuevo Cliente y Tabulador")
 
@@ -146,21 +149,37 @@ else:
         
         with col2:
             comprador = st.selectbox("Comprador", ["Seleccione", "✓ (Sí)", "X (No)"])
-            promo = st.selectbox("Promo", ["Seleccione", "✓ (Sí)", "X (No)"])
-        
-        # Campo dinámico de descripción de promo dentro del form según selección
-        desc_promo = "N/A"
-        if promo == "✓ (Sí)":
-            desc_promo = st.text_input("📝 Descripción de la Promo Impactada (Obligatorio)")
+            # Dejamos un campo fijo dentro del form para que no se pierda al enviar
+            promo_form = st.selectbox("Promo", ["Seleccione", "✓ (Sí)", "X (No)"], key="promo_form_key")
 
         agotados = st.text_input("Agotados (Indicar SKU o Escribir 'Ninguno')")
 
         submitted = st.form_submit_button("Registrar Cliente")
 
     st.divider()
+
+    # ---------------------------------------------------------
+    # 6. CAMPO DINÁMICO DE PROMO FUERA DEL FORMULARIO (APARECE AL INSTANTE)
+    # ---------------------------------------------------------
+    st.markdown("### 🎯 Detalle de Promoción")
+    opciones_promo = ["Seleccione", "✓ (Sí)", "X (No)"]
+    
+    # Sincronizamos con el selectbox del formulario mediante session_state si se desea, 
+    # o manejamos la selección interactiva fluida aquí:
+    promo_seleccion = st.selectbox(
+        "¿Se aplicó o impactó alguna Promo?",
+        opciones_promo,
+        key="selector_promo_dinamico"
+    )
+
+    desc_promo = ""
+    if promo_seleccion == "✓ (Sí)":
+        desc_promo = st.text_area("📝 Escriba la descripción de la promo impactada (Obligatorio)")
+
+    st.divider()
     
     # ---------------------------------------------------------
-    # 6. SELECCIÓN DE EVIDENCIA FUERA DEL FORMULARIO
+    # 7. SELECCIÓN DE EVIDENCIA OBLIGATORIA
     # ---------------------------------------------------------
     st.markdown("### 📸 Evidencia Obligatoria")
     
@@ -202,7 +221,7 @@ else:
                 st.rerun()
 
     # ---------------------------------------------------------
-    # 7. PROCESO DE VALIDACIÓN AL ENVIAR EL FORMULARIO
+    # 8. PROCESO DE VALIDACIÓN AL ENVIAR EL FORMULARIO
     # ---------------------------------------------------------
     if submitted:
         evidencia_valida = False
@@ -225,9 +244,11 @@ else:
             st.error("⚠️ Complete el Número de Ruta y el Nombre del Asesor.")
         elif not nombre_cliente or not quien_recibe:
             st.error("⚠️ Complete el Nombre del Cliente y el Nombre de quien recibe.")
-        elif tipo_cte == "Seleccione" or visibilidad == "Seleccione" or accesibilidad == "Seleccione" or comprador == "Seleccione" or promo == "Seleccione":
-            st.error("⚠️ Debe completar todos los campos del Tabulador de Supervisión.")
-        elif promo == "✓ (Sí)" and not desc_promo:
+        elif tipo_cte == "Seleccione" or visibilidad == "Seleccione" or accesibilidad == "Seleccione" or comprador == "Seleccione":
+            st.error("⚠️ Debe completar los campos del Tabulador de Supervisión.")
+        elif promo_seleccion == "Seleccione":
+            st.error("⚠️ Indique si hubo Promo o no en la sección de Detalle de Promoción.")
+        elif promo_seleccion == "✓ (Sí)" and not desc_promo:
             st.error("⚠️ Indique la descripción de la promo impactada.")
         elif not agotados:
             st.error("⚠️ El campo de Agotados es obligatorio (indique SKU o escriba 'Ninguno').")
@@ -236,8 +257,8 @@ else:
         elif evidencia_valida:
             link_maps = f"https://www.google.com/maps/search/?api=1&query={lat_real},{lon_real}"
             
-            # Texto formal para el registro de promo combinado en el reporte
-            texto_promo_final = f"Sí - {desc_promo}" if promo == "✓ (Sí)" else "No"
+            # Texto formal para el reporte
+            texto_promo_final = f"Sí - {desc_promo}" if promo_seleccion == "✓ (Sí)" else "No"
 
             nuevo_registro = {
                 "Fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -264,7 +285,7 @@ else:
             
             st.session_state.datos.append(nuevo_registro)
             
-            # Limpiar estados de evidencias para el siguiente registro
+            # Limpiar estados para el siguiente registro
             st.session_state.firma_guardada = False
             st.session_state.foto_guardada = False
             st.session_state.datos_foto_buffer = None
@@ -274,7 +295,7 @@ else:
             st.rerun()
 
 # ---------------------------------------------------------
-# 8. DASHBOARD EXCLUSIVO PARA ADMINISTRADORES
+# 9. DASHBOARD EXCLUSIVO PARA ADMINISTRADORES
 # ---------------------------------------------------------
 if ACCESS_GRANTED:
     st.divider()
