@@ -14,12 +14,24 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# ---------------------------------------------------------
+# LOGOTIPO Y TÍTULO DE LA EMPRESA
+# ---------------------------------------------------------
+# Opción 1: Si tienes el archivo localmente en tu repositorio (ej. "logo.png")
+# st.image("logo.png", width=200)
+
+# Opción 2: Si prefieres usar una URL directa de imagen alojada en la web
+# st.image("https://tu-sitio-web.com/logo_intmex.png", width=200)
+
 st.title("Control de Clientes - Intmex")
 
 # ---------------------------------------------------------
 # 1. CONTROL DE ACCESO AL DASHBOARD (Solo Administrador)
 # ---------------------------------------------------------
 with st.sidebar:
+    # Opcional: Logotipo también en la barra lateral
+    # st.image("logo.png", width=120)
+    
     st.subheader("Panel de Administración")
     admin_pass = st.text_input("Contraseña de Admin", type="password")
     ACCESS_GRANTED = (admin_pass == "AdminIntmex2026*") 
