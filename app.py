@@ -5,7 +5,14 @@ from streamlit_geolocation import streamlit_geolocation
 from streamlit_drawable_canvas import st_canvas
 import io
 
-# Inyección de manifiesto PWA para PWABuilder
+# 1. Configuración de la página (Única vez y al inicio de las funciones de Streamlit)
+st.set_page_config(
+    page_title="Control de Clientes - Intmex",
+    page_icon="📍",
+    layout="wide"
+)
+
+# 2. Inyección de manifiesto PWA para PWABuilder
 st.markdown(
     """
     <link rel="manifest" href="/static/manifest.json">
@@ -14,19 +21,33 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------------------------------------------------------
-# LOGOTIPO Y TÍTULO DE LA EMPRESA
-# ---------------------------------------------------------
+# 3. Bloque de CSS para el fondo estático y difuminado en toda la app
+st.markdown(
+    """
+    <style>
+    /* Fondo para toda la aplicación principal */
+    .stApp {
+        background-image: linear-gradient(rgba(13, 17, 23, 0.88), rgba(13, 17, 23, 0.88)), url("logo3.png");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
 
-# 1. Muestra el logo en la barra lateral
-st.sidebar.image("logo3.png", width=150)
+    /* Fondo para la barra lateral (Sidebar) */
+    [data-testid="stSidebar"] {
+        background-image: linear-gradient(rgba(13, 17, 23, 0.92), rgba(13, 17, 23, 0.92)), url("logo3.png");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-# 2. Muestra el logo arriba del título en la página principal
-st.image("logo3.png", width=200)
-
-st.title("Control de Clientes - Intmex")
-
-
+# --- AQUÍ CONTINÚA EL RESTO DE TU CÓDIGO ORIGINAL ---
 # ---------------------------------------------------------
 # 1. CONTROL DE ACCESO AL DASHBOARD (Solo Administrador)
 # ---------------------------------------------------------
