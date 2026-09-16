@@ -1,26 +1,15 @@
 {
-  "background_color": "#ffffff",
-  "dir": "ltr",
-  "display": "standalone",
-  "name": "Control Intmex",
-  "orientation": "any",
-  "scope": "/",
-  "short_name": "Intmex",
+  "name": "Supervision Intmex",
+  "short_name": "Supervision",
   "start_url": "/",
-  "theme_color": "#ffffff",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
   "icons": [
     {
-      "src": "/static/icon-192x192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "/static/icon-512x512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "/logo3.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
-  ],
-  "categories": [
-    "navigation"
   ]
 }
