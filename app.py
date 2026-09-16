@@ -5,6 +5,13 @@ from streamlit_geolocation import streamlit_geolocation
 from streamlit_drawable_canvas import st_canvas
 import io
 import base64
+# Inyectar el Web Manifest en el encabezado de Streamlit
+st.markdown(
+    """
+    <link rel="manifest" href="/app/static/manifest.json">
+    """,
+    unsafe_allow_html=True
+)
    
 # 1. Configuración de la página (Única vez y al inicio de las funciones de Streamlit)
 st.set_page_config(
