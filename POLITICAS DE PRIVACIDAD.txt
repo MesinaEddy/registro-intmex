@@ -1,0 +1,51 @@
+
+
+Política de Privacidad
+Última actualización: 23 de septiembre de 2026
+
+La presente Política de Privacidad describe cómo INTMEX("nosotros", "nuestro" o "la Aplicación") recopila, usa y comparte tu información cuando utilizas nuestra aplicación móvil [Nombre de la Aplicación].
+
+Al utilizar la Aplicación, aceptas las prácticas descritas en esta política. Si no estás de acuerdo con los términos, te pedimos que no utilices la aplicación.
+
+1. Información que recopilamos
+Dependiendo de cómo interactúes con nuestra app, podemos recopilar los siguientes tipos de información:
+
+Información que tú nos proporcionas: Como tu nombre, correo electrónico o datos de registro si creas una cuenta en la aplicación.
+
+Información recopilada automáticamente: Datos sobre el dispositivo que utilizas, dirección IP, tipo de sistema operativo, identificadores únicos de dispositivo y datos de uso (cómo interactúas con las funciones de la app).
+
+Permisos del dispositivo (si aplica): Nuestra app puede solicitar acceso opcional a funciones de tu dispositivo, tales como [cámara, galería de fotos, ubicación, notificaciones, etc. - elimina las que no uses], únicamente para el correcto funcionamiento de ciertas características.
+
+2. Uso de la información
+Utilizamos la información recopilada para los siguientes fines:
+
+Proveer, operar y mantener el funcionamiento de la aplicación.
+
+Mejorar, personalizar y expandir las funciones de la app.
+
+Entender y analizar cómo utilizas nuestra aplicación para optimizar la experiencia de usuario.
+
+Comunicarnos contigo, ya sea directamente o a través de nuestros socios de servicio al cliente, para ofrecerte actualizaciones o información relacionada con la app.
+
+3. Compartir la información
+No vendemos, comercializamos ni transferimos tu información personal a terceros, excepto en los siguientes casos:
+
+Proveedores de servicios: Podemos compartir datos con empresas de confianza que nos ayudan a operar la app (por ejemplo, servicios de alojamiento en la nube, análisis de datos o bases de datos), siempre bajo estrictas normas de confidencialidad.
+
+Requisitos legales: Cuando creamos de buena fe que es necesario para cumplir con la ley, proteger nuestros derechos o la seguridad de los usuarios.
+
+4. Seguridad de los datos
+Implementamos medidas de seguridad razonables para proteger tu información contra el acceso, alteración, divulgación o destrucción no autorizados. Sin embargo, recuerda que ningún método de transmisión por Internet o almacenamiento electrónico es 100% seguro.
+
+5. Privacidad de los menores
+Nuestra aplicación [no está dirigida a / está dirigida a] menores de 13 años. No recopilamos conscientemente información personal de niños menores de esa edad. Si eres padre o tutor y sabes que tu hijo nos ha proporcionado información personal, contáctanos para eliminarla.
+
+6. Cambios en esta Política de Privacidad
+Podemos actualizar nuestra Política de Privacidad periódicamente. Te recomendamos revisar esta página de forma regular para estar al tanto de cualquier cambio. Los cambios entran en vigencia inmediatamente después de su publicación en la aplicación.
+
+7. Contacto
+Si tienes preguntas o sugerencias sobre nuestra Política de Privacidad, no dudes en contactarnos a través de:
+
+Correo electrónico: operaciones.tijuana@intmex.com.mx
+
+Sitio web: www.intmex.com.mx
