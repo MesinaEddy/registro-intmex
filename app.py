@@ -10,6 +10,16 @@ st.markdown(
     """
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#ffffff">
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/pwabuilder-sw.js')
+          .then(function(reg) {
+            console.log('Service Worker registrado con éxito:', reg.scope);
+          }).catch(function(err) {
+            console.log('Error al registrar el Service Worker:', err);
+          });
+      }
+    </script>
     """,
     unsafe_allow_html=True
 )
