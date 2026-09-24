@@ -8,25 +8,17 @@ import base64
 # Inyectar el Web Manifest en el encabezado de Streamlit
 st.markdown(
     """
-    <link rel="manifest" href="/app/static/manifest.json">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ffffff">
     """,
     unsafe_allow_html=True
 )
    
 # 1. Configuración de la página (Única vez y al inicio de las funciones de Streamlit)
 st.set_page_config(
-    page_title="Control de Clientes - Intmex",
+    page_title="SUPERVISION - INTMEX",
     page_icon="📍",
     layout="wide"
-)
-
-# 2. Inyección de manifiesto PWA para PWABuilder
-st.markdown(
-    """
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#ffffff">
-    """,
-    unsafe_allow_html=True
 )
 
 # Función para convertir la imagen local a Base64
@@ -34,9 +26,9 @@ def get_base64_of_image(image_path):
     with open(image_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
 
-# Cargar la imagen en base64 (asegúrate de que se llame "logo3.png")
+# Cargar la imagen en base64 (asegúrate de que se llame "icon-512.png")
 try:
-    img_base64 = get_base64_of_image("logo3.png")
+    img_base64 = get_base64_of_image("icon-512.png")
     background_css = f"""
     <style>
     /* Fondo para toda la aplicación principal */
